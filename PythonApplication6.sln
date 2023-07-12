@@ -1,8 +1,11 @@
 import tkinter as tk
+import webbrowser
+from tkinter import filedialog
 
 # Function to handle the button click event
 def options_clicked():
     # Hide the main window
+    window.attributes("-topmost", False)
     window.withdraw()
 
     # Create a new window for options
@@ -22,9 +25,54 @@ def options_clicked():
         options_window.destroy()
         # Show the main window again
         window.deiconify()
+        window.attributes("-topmost", True)
 
-    # Bind the close_options function to the close button
-    options_window.protocol("WM_DELETE_WINDOW", close_options)
+    # Function to open the download URL
+    def open_download_url():
+        webbrowser.open("https://discord.com/channels/1128397491637850152/1128404235348869200")
+
+    # Function to handle selecting folder location
+    def choose_folder_location():
+        global selected_folder_location
+        folder_location = filedialog.askdirectory()
+        selected_folder_location = folder_location
+        folder_location_label.config(text="Selected folder location: " + selected_folder_location)
+
+    # Function to save the folder location
+    def save_folder_location():
+        if selected_folder_location:
+            with open("folder_location.txt", "w") as file:
+                file.write(selected_folder_location)
+                print("Folder location saved.")
+        else:
+            print("No folder location selected.")
+
+    # Create a "Download" button in the top middle
+    download_button = tk.Button(options_window, text="Download", font=("Impact", 14), command=open_download_url, bg="blue", fg="white", relief="flat")
+    download_button.pack(pady=10)
+
+    # Create a "Choose Folder Location" button
+    choose_folder_button = tk.Button(options_window, text="Choose Folder Location", font=("Impact", 14), command=choose_folder_location, bg="blue", fg="white", relief="flat")
+    choose_folder_button.pack(pady=10)
+
+    # Create a label to display the selected folder location
+    folder_location_label = tk.Label(options_window, text="Selected folder location: " + selected_folder_location, font=("Impact", 12), fg="white", bg="blue")
+    folder_location_label.pack(pady=10)
+
+    # Create a "Save Folder Location" button
+    save_folder_button = tk.Button(options_window, text="Save Folder Location", font=("Impact", 14), command=save_folder_location, bg="blue", fg="white", relief="flat")
+    save_folder_button.pack(pady=10)
+
+    # Create the Return button with the same look and position as the Options button
+    return_button = tk.Button(options_window, text="Return", font=("Impact", 14), command=close_options, bg="blue", fg="white", relief="flat")
+    return_button.pack(side="left", padx=10, pady=10, anchor="sw")
+
+    # Disable window resizing and maximize button
+    options_window.resizable(False, False)
+    options_window.attributes("-toolwindow", 1)
+
+    # Run the options window's event loop
+    options_window.mainloop()
 
 # Create a window instance
 window = tk.Tk()
@@ -38,6 +86,7 @@ window.resizable(False, False)
 # Set window attributes to prevent minimizing and full screen
 window.attributes("-topmost", True)
 window.attributes("-fullscreen", False)
+window.attributes("-toolwindow", 1)
 
 # Set the background color to blue
 window.configure(bg="blue")
@@ -50,9 +99,18 @@ label = tk.Label(window, text="Cean", font=("Impact", 24), fg="white", bg="blue"
 label.pack(anchor="nw", padx=10, pady=10)
 
 # Create the Options button with transparent background
-button = tk.Button(window, text="Options", font=("Impact", 14), command=options_clicked, bg="blue", fg="white",
-                   relief="flat")
+button = tk.Button(window, text="Options", font=("Impact", 14), command=options_clicked, bg="blue", fg="white", relief="flat")
 button.pack(side="left", padx=10, pady=10, anchor="sw")
+
+# Global variable to store the selected folder location
+selected_folder_location = ""
+
+# Read the saved folder location from file, if available
+try:
+    with open("folder_location.txt", "r") as file:
+        selected_folder_location = file.read().strip()
+except FileNotFoundError:
+    print("Folder location file not found.")
 
 # Run the window's event loop
 window.mainloop()
